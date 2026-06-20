@@ -43,9 +43,16 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
-      <Route path="/home" element={<HomePage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/post/:slug" element={<PostDetailPage />} />
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/write"
         element={
