@@ -40,9 +40,14 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
+  const { user } = useAuth();
   return (
     <Routes>
-      <Route path="/" element={<LoginPage />} />
+      <Route
+        path="/"
+        element={user ? <Navigate to="/home" /> : <LoginPage />}
+      />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/post/:slug" element={<PostDetailPage />} />
       <Route

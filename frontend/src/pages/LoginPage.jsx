@@ -22,7 +22,7 @@ const LoginPage = () => {
       const res = await API.post("/auth/login", formData);
       login(res.data, res.data.token);
       toast.success("Welcome back! 👋");
-      navigate("/");
+      navigate("/home");
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed");
     } finally {
