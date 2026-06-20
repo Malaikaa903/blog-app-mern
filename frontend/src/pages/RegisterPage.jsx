@@ -416,61 +416,6 @@ const RegisterPage = () => {
               </div>
             </div>
 
-            {/* Terms */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: "10px",
-                marginTop: "4px",
-              }}
-            >
-              <input
-                type="checkbox"
-                id="terms"
-                required
-                style={{
-                  width: "18px",
-                  height: "18px",
-                  marginTop: "2px",
-                  accentColor: "#4F46E5",
-                  cursor: "pointer",
-                }}
-              />
-              <label
-                htmlFor="terms"
-                style={{
-                  fontSize: "13px",
-                  color: "#64748B",
-                  lineHeight: 1.5,
-                  cursor: "pointer",
-                }}
-              >
-                I agree to the{" "}
-                <Link
-                  to="/terms"
-                  style={{
-                    color: "#4F46E5",
-                    textDecoration: "none",
-                    fontWeight: 500,
-                  }}
-                >
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link
-                  to="/privacy"
-                  style={{
-                    color: "#4F46E5",
-                    textDecoration: "none",
-                    fontWeight: 500,
-                  }}
-                >
-                  Privacy Policy
-                </Link>
-              </label>
-            </div>
-
             {/* Submit Button */}
             <button
               type="submit"
