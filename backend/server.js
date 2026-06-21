@@ -8,7 +8,12 @@ connectDB();
 
 const app = express();
 
-app.use(cors({ origin: "*", credentials: false }));
+app.use(
+  cors({
+    origin: ["https://blog-app-mern-qnmj.vercel.app", "http://localhost:5173"],
+    credentials: false,
+  }),
+);
 app.use(express.json());
 
 // Test route
