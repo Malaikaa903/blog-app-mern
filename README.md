@@ -9,8 +9,8 @@ A full-stack **Blog Platform** built with the **MERN Stack** where users can rea
 
 ## 🚀 Live Demo
 
-- **Frontend:** your_vercel_frontend_url
-- **Backend API:** your_vercel_backend_url
+- **Frontend:** https://blog-app-mern-qnmj.vercel.app/
+- **Backend API:** https://blog-app-mern-kappa.vercel.app/
 
 ---
 
