@@ -15,6 +15,7 @@ const PostDetailPage = () => {
   const [likeCount, setLikeCount] = useState(0);
   const [isLiking, setIsLiking] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -24,6 +25,10 @@ const PostDetailPage = () => {
         setLikeCount(res.data.likes?.length || 0);
         if (user) {
           setLiked(res.data.likes?.includes(user._id));
+          // Check if saved
+          const savedRes = await API.get("/auth/saved-posts");
+          const savedIds = savedRes.data.map((p) => p._id);
+          setIsSaved(savedIds.includes(res.data._id));
         }
       } catch (_err) {
         toast.error("Post not found");
@@ -63,20 +68,11 @@ const PostDetailPage = () => {
 
     setIsSaving(true);
     try {
-      // Simulate saving - you can implement actual save API
-      const savedPosts = JSON.parse(localStorage.getItem("savedPosts") || "[]");
-
-      if (savedPosts.includes(post._id)) {
-        // Remove from saved
-        const updated = savedPosts.filter((id) => id !== post._id);
-        localStorage.setItem("savedPosts", JSON.stringify(updated));
-        toast.success("Post removed from saved!");
-      } else {
-        // Add to saved
-        savedPosts.push(post._id);
-        localStorage.setItem("savedPosts", JSON.stringify(savedPosts));
-        toast.success("Post saved! 📚");
-      }
+      const res = await API.put(`/auth/save/${post._id}`);
+      setIsSaved(res.data.saved);
+      toast.success(
+        res.data.saved ? "Post saved! 📚" : "Post removed from saved!",
+      );
     } catch (_err) {
       toast.error("Failed to save post");
     } finally {
@@ -154,8 +150,6 @@ Saved from BlogSpace
 
   const catStyle = categoryColors[post.category] || categoryColors.other;
   const readingTime = Math.ceil(post.content.split(/\s+/).length / 200);
-  const savedPosts = JSON.parse(localStorage.getItem("savedPosts") || "[]");
-  const isSaved = savedPosts.includes(post._id);
 
   return (
     <div style={{ background: "#FAFBFC", minHeight: "100vh" }}>

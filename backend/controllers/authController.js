@@ -102,4 +102,47 @@ const updateAvatar = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getProfile, updateAvatar };
+const toggleSavePost = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const postId = req.params.postId;
+    const isSaved = user.savedPosts.includes(postId);
+
+    if (isSaved) {
+      user.savedPosts = user.savedPosts.filter(
+        (id) => id.toString() !== postId,
+      );
+      await user.save();
+      res
+        .status(200)
+        .json({ saved: false, message: "Post removed from saved" });
+    } else {
+      user.savedPosts.push(postId);
+      await user.save();
+      res.status(200).json({ saved: true, message: "Post saved!" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getSavedPosts = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate({
+      path: "savedPosts",
+      populate: { path: "author", select: "name avatar" },
+    });
+    res.status(200).json(user.savedPosts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  getProfile,
+  updateAvatar,
+  toggleSavePost,
+  getSavedPosts,
+};

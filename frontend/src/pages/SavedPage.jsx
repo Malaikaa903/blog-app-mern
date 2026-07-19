@@ -13,41 +13,21 @@ const SavedPage = () => {
   useEffect(() => {
     const fetchSavedPosts = async () => {
       try {
-        // Get saved post IDs from localStorage
-        const savedIds = JSON.parse(localStorage.getItem("savedPosts") || "[]");
-
-        if (savedIds.length === 0) {
-          setSavedPosts([]);
-          setLoading(false);
-          return;
-        }
-
-        // Fetch all saved posts
-        const res = await API.get("/posts");
-        const allPosts = res.data.posts || res.data;
-
-        // Filter only saved posts
-        const saved = allPosts.filter((post) => savedIds.includes(post._id));
-        setSavedPosts(saved);
+        const res = await API.get("/auth/saved-posts");
+        setSavedPosts(res.data);
       } catch (_err) {
         toast.error("Failed to load saved posts");
       } finally {
         setLoading(false);
       }
     };
-
     fetchSavedPosts();
   }, []);
 
-  const handleRemoveSaved = (postId) => {
+  const handleRemoveSaved = async (postId) => {
     setRemovingId(postId);
     try {
-      // Remove from localStorage
-      const savedIds = JSON.parse(localStorage.getItem("savedPosts") || "[]");
-      const updated = savedIds.filter((id) => id !== postId);
-      localStorage.setItem("savedPosts", JSON.stringify(updated));
-
-      // Remove from state
+      await API.put(`/auth/save/${postId}`);
       setSavedPosts(savedPosts.filter((post) => post._id !== postId));
       toast.success("Post removed from saved!");
     } catch (_err) {
@@ -57,18 +37,23 @@ const SavedPage = () => {
     }
   };
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     if (window.confirm("Are you sure you want to clear all saved posts?")) {
-      localStorage.removeItem("savedPosts");
-      setSavedPosts([]);
-      toast.success("All saved posts cleared!");
+      try {
+        await Promise.all(
+          savedPosts.map((post) => API.put(`/auth/save/${post._id}`)),
+        );
+        setSavedPosts([]);
+        toast.success("All saved posts cleared!");
+      } catch (_err) {
+        toast.error("Failed to clear saved posts");
+      }
     }
   };
 
   return (
     <div style={{ background: "#FAFBFC", minHeight: "100vh" }}>
       <Navbar />
-
       <div
         style={{ maxWidth: "820px", margin: "0 auto", padding: "60px 30px" }}
       >
@@ -133,13 +118,6 @@ const SavedPage = () => {
                   fontSize: "13px",
                   fontWeight: 500,
                   cursor: "pointer",
-                  transition: "all 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#FEF2F2";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "white";
                 }}
               >
                 🗑️ Clear All
@@ -155,16 +133,6 @@ const SavedPage = () => {
                   fontSize: "13px",
                   fontWeight: 500,
                   cursor: "pointer",
-                  transition: "all 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 4px 12px rgba(0,0,0,0.2)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "none";
                 }}
               >
                 Browse More
@@ -173,7 +141,7 @@ const SavedPage = () => {
           )}
         </div>
 
-        {/* Loading State */}
+        {/* Loading */}
         {loading && (
           <div style={{ textAlign: "center", padding: "80px 0" }}>
             <div
@@ -219,12 +187,10 @@ const SavedPage = () => {
                 marginBottom: "24px",
                 lineHeight: 1.7,
                 maxWidth: "400px",
-                marginLeft: "auto",
-                marginRight: "auto",
+                margin: "0 auto 24px",
               }}
             >
-              Start saving your favorite posts to read later. Click the bookmark
-              icon on any post you like!
+              Start saving your favorite posts to read later!
             </p>
             <button
               onClick={() => navigate("/")}
@@ -237,15 +203,6 @@ const SavedPage = () => {
                 fontSize: "14px",
                 fontWeight: 600,
                 cursor: "pointer",
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "none";
               }}
             >
               📖 Browse Posts
@@ -271,7 +228,6 @@ const SavedPage = () => {
                   border: "1px solid #E5E7EB",
                   overflow: "hidden",
                   transition: "all 0.3s ease",
-                  position: "relative",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "translateY(-4px)";
@@ -283,37 +239,16 @@ const SavedPage = () => {
                   e.currentTarget.style.boxShadow = "none";
                 }}
               >
-                {/* Cover Image */}
                 {post.coverImage && (
                   <div
                     style={{
                       height: "180px",
                       background: `url(${post.coverImage}) center/cover`,
-                      position: "relative",
                     }}
-                  >
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "12px",
-                        right: "12px",
-                        background: "rgba(0,0,0,0.6)",
-                        backdropFilter: "blur(4px)",
-                        padding: "4px 12px",
-                        borderRadius: "12px",
-                        fontSize: "11px",
-                        fontWeight: 600,
-                        color: "white",
-                        textTransform: "capitalize",
-                      }}
-                    >
-                      {post.status || "Published"}
-                    </div>
-                  </div>
+                  ></div>
                 )}
 
                 <div style={{ padding: "16px 20px" }}>
-                  {/* Category Badge */}
                   <div
                     style={{
                       display: "flex",
@@ -331,17 +266,11 @@ const SavedPage = () => {
                         padding: "3px 12px",
                         borderRadius: "12px",
                         textTransform: "uppercase",
-                        letterSpacing: "0.3px",
                       }}
                     >
                       {post.category || "General"}
                     </span>
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "#9CA3AF",
-                      }}
-                    >
+                    <span style={{ fontSize: "11px", color: "#9CA3AF" }}>
                       {new Date(post.createdAt).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",
@@ -350,7 +279,6 @@ const SavedPage = () => {
                     </span>
                   </div>
 
-                  {/* Title */}
                   <Link
                     to={`/post/${post.slug}`}
                     style={{ textDecoration: "none" }}
@@ -362,28 +290,19 @@ const SavedPage = () => {
                         color: "#0F172A",
                         marginBottom: "8px",
                         lineHeight: 1.4,
-                        transition: "color 0.2s ease",
                         display: "-webkit-box",
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: "vertical",
                         overflow: "hidden",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.color = "#4F46E5";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = "#0F172A";
                       }}
                     >
                       {post.title}
                     </h3>
                   </Link>
 
-                  {/* Meta Info */}
                   <div
                     style={{
                       display: "flex",
-                      alignItems: "center",
                       gap: "12px",
                       fontSize: "12px",
                       color: "#6B7280",
@@ -397,47 +316,6 @@ const SavedPage = () => {
                     <span>❤️ {post.likes?.length || 0}</span>
                   </div>
 
-                  {/* Tags */}
-                  {post.tags?.length > 0 && (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: "4px",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      {post.tags.slice(0, 3).map((tag) => (
-                        <span
-                          key={tag}
-                          style={{
-                            fontSize: "11px",
-                            color: "#6B7280",
-                            background: "#F3F4F6",
-                            padding: "2px 10px",
-                            borderRadius: "12px",
-                          }}
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                      {post.tags.length > 3 && (
-                        <span
-                          style={{
-                            fontSize: "11px",
-                            color: "#9CA3AF",
-                            background: "#F3F4F6",
-                            padding: "2px 10px",
-                            borderRadius: "12px",
-                          }}
-                        >
-                          +{post.tags.length - 3}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Action Buttons */}
                   <div
                     style={{
                       display: "flex",
@@ -459,13 +337,6 @@ const SavedPage = () => {
                         fontWeight: 500,
                         textAlign: "center",
                         textDecoration: "none",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "#4338CA";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#4F46E5";
                       }}
                     >
                       📖 Read
@@ -481,18 +352,8 @@ const SavedPage = () => {
                         color: "#EF4444",
                         fontSize: "13px",
                         fontWeight: 500,
-                        cursor:
-                          removingId === post._id ? "not-allowed" : "pointer",
-                        transition: "all 0.2s ease",
+                        cursor: "pointer",
                         opacity: removingId === post._id ? 0.6 : 1,
-                      }}
-                      onMouseEnter={(e) => {
-                        if (removingId !== post._id) {
-                          e.currentTarget.style.background = "#FEF2F2";
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "white";
                       }}
                     >
                       {removingId === post._id ? "⏳" : "🗑️"}

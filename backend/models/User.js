@@ -28,6 +28,12 @@ const userSchema = new mongoose.Schema(
       default: "",
       maxlength: 200,
     },
+    savedPosts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
   },
   { timestamps: true },
 );

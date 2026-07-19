@@ -5,6 +5,8 @@ const {
   login,
   getProfile,
   updateAvatar,
+  toggleSavePost,
+  getSavedPosts,
 } = require("../controllers/authController");
 const { protect } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
@@ -13,6 +15,8 @@ router.post("/register", register);
 router.post("/login", login);
 router.get("/profile", protect, getProfile);
 router.put("/avatar", protect, upload.single("avatar"), updateAvatar);
+router.put("/save/:postId", protect, toggleSavePost);
+router.get("/saved-posts", protect, getSavedPosts);
 router.put("/avatar/remove", protect, async (req, res) => {
   try {
     const User = require("../models/User");
