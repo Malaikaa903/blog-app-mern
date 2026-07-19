@@ -23,8 +23,8 @@ const SavedPage = () => {
         }
 
         // Fetch all saved posts
-        const res = await API.get("/posts/my-posts");
-        const allPosts = res.data;
+        const res = await API.get("/posts");
+        const allPosts = res.data.posts || res.data;
 
         // Filter only saved posts
         const saved = allPosts.filter((post) => savedIds.includes(post._id));
